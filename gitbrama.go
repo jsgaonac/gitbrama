@@ -83,7 +83,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	s := "Select branches to delete?\n\n"
+	s := "Select branches to delete:\n\n"
 
 	for i, choice := range m.choices {
 
@@ -116,12 +116,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	for _, branch := range branches {
-		fmt.Println(branch)
-	}
-
 	initialModel := model{
-		choices:  []string{},
+		choices:  branches,
 		selected: make(map[int]struct{}),
 	}
 
