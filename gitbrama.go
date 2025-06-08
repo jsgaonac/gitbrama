@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"os"
-	"os/exec"
-	"strings"
 )
 
 type model struct {
@@ -15,25 +15,31 @@ type model struct {
 }
 
 func getBranches() ([]string, error) {
-	cmd := exec.Command("git", "branch")
-
-	stdout, err := cmd.Output()
+	repo, err := git.PlainOpen(".")
 
 	if err != nil {
 		return nil, err
 	}
 
-	branchesStr := string(stdout)
+	branches, err := repo.Branches()
 
-	branches := []string{}
-
-	for _, branch := range strings.Split(strings.TrimSpace(branchesStr), "\n") {
-		if !strings.Contains(branch, "*") {
-			branches = append(branches, strings.TrimSpace(branch))
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	return branches, nil
+	var branchesList []string
+
+	err = branches.ForEach(func(ref *plumbing.Reference) error {
+		branchesList = append(branchesList, ref.Name().Short())
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return branchesList, nil
 }
 
 func (m model) Init() tea.Cmd {
